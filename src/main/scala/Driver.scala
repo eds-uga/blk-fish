@@ -1,8 +1,8 @@
 /**
-  * Created by bradford_bazemore on 9/4/16.
+  * Forked by Chandler Kincaid on 9/7/16.
   */
 object Driver {
   def main(args:Array[String])={
-    println("Hello World")
+    //val lines = sqlContext.read.text(small_train_tokenized.csv).as[String]
   }
 }
