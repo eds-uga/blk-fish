@@ -11,10 +11,6 @@ import org.apache.spark.mllib.util.MLUtils
   */
 object MLAlgorithms {
 
-  val conf = ConfigFactory.load()
-  val sparkConf = new SparkConf().setAppName(conf.getString("spark.appName"))
-  val sc = new SparkContext(sparkConf)
-
   val numClasses = 9
   val categoricalFeatureInfo = Map[Int, Int]()//Can be used to make certain features (e.g .dll) categorical, for now not used
   val numTrees = 10
@@ -26,6 +22,9 @@ object MLAlgorithms {
 
 
   def main(args:Array[String]) = {
+
+    val sparkConf = new SparkConf().setAppName("test")
+    val sc = new SparkContext(sparkConf)
 
     val data = MLUtils.loadLibSVMFile(sc, "blk-fish/small_train_MLUtil.txt")
 
