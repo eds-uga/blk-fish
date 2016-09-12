@@ -40,6 +40,13 @@ object MLAlgorithms {
 
     //output results
     labelAndPreds.foreach(println)
+    val correct = labelAndPreds.filter(x => x._1 == x._2)
+    println("correct: " + correct.count)
+    val incorrect = labelAndPreds.filter(x => x._1 != x._2)
+    println("incorrect: " + incorrect.count)
+    val percentage = correct.count.toDouble/(correct.count.toDouble + incorrect.count.toDouble)
+    println("PERCENTAGE: " + percentage)
+
 
   }
 
