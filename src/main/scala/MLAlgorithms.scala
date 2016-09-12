@@ -1,13 +1,10 @@
-import com.typesafe.config.ConfigFactory
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.mllib.tree.model.RandomForestModel
 import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.mllib.tree.GradientBoostedTrees
-import org.apache.spark.mllib.tree.configuration.{Algo, BoostingStrategy, QuantileStrategy, Strategy}
-import org.apache.spark.mllib.tree.impurity.Gini
-import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel
-import org.apache.spark.sql.catalyst.plans.logical.Sort
+import org.apache.spark.mllib.tree.configuration.BoostingStrategy
+
 
 
 /**
@@ -35,7 +32,7 @@ object MLAlgorithms {
     val sparkConf = new SparkConf().setAppName("test")
     val sc = new SparkContext(sparkConf)
     //data processing
-    val data = MLUtils.loadLibSVMFile(sc, "SVM.txt")
+    val data = MLUtils.loadLibSVMFile(sc, "C:/Users/Brent/IdeaProjects/blk-fish/SVM.txt/")
     val splits = data.randomSplit(Array(.75,.25))
     val (trainingData, testingData) = (splits(0), splits(1))
 
