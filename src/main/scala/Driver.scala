@@ -43,7 +43,7 @@ object Driver {
           }
     })
 
-    byteCounts.toLocalIterator.foreach(m=>for((k,v) <- m) printf("key: %s, value: %s\n", k, v))
+    println(byteCounts.count)
 
   }
 }
