@@ -74,6 +74,7 @@ object MLAlgorithms {
       val prediction = modelGB.predict(point.features)
       (point.label, prediction)
     }
+    labelAndPredsGB.foreach(println)
     val correctGB = labelAndPredsGB.filter(x => x._1 == x._2)
     println("correct: " + correctGB.count)
     val incorrectGB = labelAndPredsGB.filter(x => x._1 != x._2)
@@ -82,7 +83,6 @@ object MLAlgorithms {
     println("PERCENTAGE: " + percentageGB)
 
     //output results
-    labelAndPredsGB.foreach(println)
 
   }
 
