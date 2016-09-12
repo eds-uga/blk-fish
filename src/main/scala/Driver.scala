@@ -12,8 +12,13 @@ import org.apache.spark.mllib.tree.RandomForest
 object Driver {
   def main(args: Array[String]) = {
 
+    //"gs://project2-csci8360/data/trainLabels.csv"
+    //"gs://project2-csci8360/data/train/*.bytes"
 
-    val numClasses = 9
+    //"/media/brad/BackUps/ms_mal_data/trainLabels.csv"
+    //"/media/brad/BackUps/ms_mal_data/*.bytes"
+
+    val numClasses = 10
     val categoricalFeatureInfo = Map[Int, Int]()//Can be used to make certain features (e.g .dll) categorical, for now not used
     val numTrees = 10
     val featureSubsetStrategy = "auto" //Will use sqrt strategy for numTrees > 1
@@ -75,16 +80,16 @@ object Driver {
         LabeledPoint(
           filesCats.get(point._1).head.toDouble,
           Vectors.sparse(
-            point._2.size,
+            257,
             point._2.keySet.toArray,
             point._2.values.toArray
           )
         )
     })
+    trainPoints.foreach(a=>print(a.toString()))
 
 
-
-    val splits = trainPoints.randomSplit(Array(.75,.25))
+    val splits = trainPoints.randomSplit(Array(.99,.01))
     val (trainingData, testingData) = (splits(0), splits(1))
 
     //training
