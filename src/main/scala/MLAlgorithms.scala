@@ -46,14 +46,10 @@ object MLAlgorithms {
     }
 
     labelAndPreds.foreach(println)
-    val correct = labelAndPreds.filter(x => x._1 == x._2)
-    println("correct: " + correct.count)
-    val incorrect = labelAndPreds.filter(x => x._1 != x._2)
-    println("incorrect: " + incorrect.count)
-    val percentage = correct.count.toDouble/(correct.count.toDouble + incorrect.count.toDouble)
-    println("PERCENTAGE: " + percentage)
+    val accuracy = labelAndPreds.filter(pair => pair._1 == pair._2).count().toDouble/labelAndPreds.count().toDouble
+    println(accuracy)
 
-
+    //Now using gradient boosted tree strategy
     val boostingStrategy = BoostingStrategy.defaultParams("Classification")
     boostingStrategy.treeStrategy.setMaxBins(maxBins)
     boostingStrategy.treeStrategy.setMaxDepth(maxDepth)
@@ -72,14 +68,9 @@ object MLAlgorithms {
       (point.label, prediction)
     }
     labelAndPredsGB.foreach(println)
-    val correctGB = labelAndPredsGB.filter(x => x._1 == x._2)
-    println("correct: " + correctGB.count)
-    val incorrectGB = labelAndPredsGB.filter(x => x._1 != x._2)
-    println("incorrect: " + incorrectGB.count)
-    val percentageGB = correctGB.count.toDouble/(correctGB.count.toDouble + incorrectGB.count.toDouble)
-    println("PERCENTAGE: " + percentageGB)
+    val accuracyGB = labelAndPredsGB.filter(pair => pair._1 == pair._2).count().toDouble/labelAndPreds.count().toDouble
+    println(accuracyGB)
 
-    //output results
 
   }
 
