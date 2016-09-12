@@ -3,6 +3,11 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.mllib.tree.model.RandomForestModel
 import org.apache.spark.mllib.util.MLUtils
+import org.apache.spark.mllib.tree.GradientBoostedTrees
+import org.apache.spark.mllib.tree.configuration.{Algo, BoostingStrategy, QuantileStrategy, Strategy}
+import org.apache.spark.mllib.tree.impurity.Gini
+import org.apache.spark.mllib.tree.model.GradientBoostedTreesModel
+import org.apache.spark.sql.catalyst.plans.logical.Sort
 
 
 /**
@@ -19,6 +24,11 @@ object MLAlgorithms {
   val maxBins = 32
   //val seed = scala.util.Random.nextLong()
 
+  //Gradient Boosted parameters not shared
+  val minInfoGain =   0.00001
+  val numIterations = 100
+  val learningRate =   .05
+  val validationTotal =   .001
 
   def main(args:Array[String]) = {
 
@@ -38,8 +48,28 @@ object MLAlgorithms {
       (point.label, prediction)
     }
 
-    //output results
     labelAndPreds.foreach(println)
+
+    val boostingStrategy = BoostingStrategy.defaultParams("Classification")
+    boostingStrategy.treeStrategy.setMaxBins(maxBins)
+    boostingStrategy.treeStrategy.setMaxDepth(maxDepth)
+    boostingStrategy.treeStrategy.setNumClasses(numClasses)
+    boostingStrategy.treeStrategy.setMinInfoGain(minInfoGain)
+    boostingStrategy.treeStrategy.setCategoricalFeaturesInfo(categoricalFeatureInfo)
+    boostingStrategy.setNumIterations(numIterations)
+    boostingStrategy.setLearningRate(learningRate)
+    boostingStrategy.setValidationTol(validationTotal)
+
+
+    val modelGB = GradientBoostedTrees.train(trainingData, boostingStrategy)
+
+    val labelAndPredsGB = testingData.map { point =>
+      val prediction = modelGB.predict(point.features)
+      (point.label, prediction)
+    }
+
+    //output results
+    labelAndPredsGB.foreach(println)
 
   }
 
