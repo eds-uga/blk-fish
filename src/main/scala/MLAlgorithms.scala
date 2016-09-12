@@ -14,8 +14,8 @@ object MLAlgorithms {
   val categoricalFeatureInfo = Map[Int, Int]()//Can be used to make certain features (e.g .dll) categorical, for now not used
   val numTrees = 10
   val featureSubsetStrategy = "auto" //Will use sqrt strategy for numTrees > 1
-  val costFunction = "gini" //Other option entropy, gini better for continuous, entropy better for categorical. (though very little difference, and gini is faster)
-  val maxDepth = 4
+  val costFunction = "entropy" //Other option entropy, gini better for continuous, entropy better for categorical. (though very little difference, and gini is faster)
+  val maxDepth = 5
   val maxBins = 32
   //val seed = scala.util.Random.nextLong()
 
