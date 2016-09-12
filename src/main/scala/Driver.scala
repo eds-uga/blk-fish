@@ -14,36 +14,28 @@ object Driver {
 
     val filesCats: RDD[(String, String)] = sc.textFile("gs://project2-csci8360/data/trainLabels.csv").map(line => (line.split(",")(0).replace("\"", ""), line.split(",")(1)))
     val trainData: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/train/*.bytes")
-    //val bytes:ListBuffer[scala.collection.Map[String,Int]]=ListBuffer()
 
-/*    filesCats.toLocalIterator.foreach({
+    val bytes: RDD[(String, Array[String])] = trainData.map({
       kv =>
-        try {
-          val temp = sc.textFile("gs://project2-csci8360/data/train/" + kv._1 + ".bytes")
-          val words = temp.flatMap(word => word.split(" "))
-          val nomem = words.filter(nums => nums.length <= 2)
-          val bytecount = nomem.map(byte => (byte, 1)).reduceByKey(_ + _)
-          bytes.append(bytecount.collectAsMap())
-        }catch{
-          case e: InvalidInputException=>println("ERROR: Missing file")
-        }
-    })*/
-
-    val bytes: RDD[Array[String]] = trainData.map({
-      kv=>
-        kv._2.split(" ")
-        .filter(num=>num.length<=2)
+        (
+          kv._1,
+          kv._2.split(" ")
+            .filter(num => num.length <= 2)
+          )
     })
 
-    val byteCounts: RDD[Map[String, Int]] = bytes.map({
-      doc=>
-        doc.foldLeft(Map.empty[String, Int]){
+    val byteCounts = bytes.map({
+      doc =>
+        (
+          doc._1,
+          doc._2.foldLeft(Map.empty[String, Int]) {
             (count, word) =>
               count + (word -> (count.getOrElse(word, 0) + 1))
           }
+          )
     })
 
-    println(byteCounts.count)
+    println(byteCounts.count())
 
   }
 }
