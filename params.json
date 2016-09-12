@@ -1,0 +1,6 @@
+{
+  "name": "Blk-fish",
+  "tagline": "Automated malware classification system",
+  "body": "<p align=\"center\">\r\n  <img src=\"https://github.com/snakes-in-the-box/blk-fish/blob/master/blkfish.png\">\r\n</p>\r\n\r\n\r\n\r\n\r\n[![Join the chat at https://gitter.im/blk-fish/Lobby](https://badges.gitter.im/blk-fish/Lobby.svg)](https://gitter.im/blk-fish/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)\r\n[![Build Status](https://travis-ci.org/snakes-in-the-box/blk-fish.svg?branch=master)](https://travis-ci.org/snakes-in-the-box/blk-fish)\r\n\r\nAutomated malware classification system\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
