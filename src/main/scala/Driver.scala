@@ -26,15 +26,19 @@ object Driver {
     val sparkConf = new SparkConf().setAppName("test-preprocess")
     val sc = new SparkContext(sparkConf)
 
-    val filesCats: RDD[(String, String)] = sc.textFile("gs://project2-csci8360/data/trainLabels.csv").map(line => (line.split(",")(0).replace("\"", ""), line.split(",")(1)))
+    val filesMeow: RDD[(String, String)] = sc.textFile("gs://project2-csci8360/data/trainLabels.csv").map(line => (line.split(",")(0).replace("\"", ""), line.split(",")(1)))
+    val filesCats: Map[String, String] = filesMeow.toLocalIterator.foldLeft(Map.empty[String, String]) {
+      (acc, word) =>
+        acc + (word._1->word._2)
+    }
 
     val trainDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/train/*.bytes")
     //val trainDataAsm = sc.wholeTextFiles("gs://project2-csci8360/data/train/*.asm")
 
     val bytes: RDD[(String, Array[String])] = trainDataBytes.map({
-      kv =>
+      (kv: (String, String)) =>
         (
-          kv._1,
+          kv._1.replaceAll("(.*\\/)","").replaceAll("(\\.\\w+)+",""),
           kv._2.split(" ")
             .filter(num => num.length <= 2)
           )
@@ -56,16 +60,20 @@ object Driver {
         (
           doc._1,
           doc._2.map(
-            byte =>
-              (Integer.parseInt(byte._1,16),byte._2)
+            (byte: (String, Double)) =>
+              try {
+                (Integer.parseInt(byte._1, 16), byte._2)
+              }catch{
+                case e : NumberFormatException => (257,byte._2)
+              }
             )
           )
     })
 
     val trainPoints: RDD[LabeledPoint] = byteCounts.map({
-      point=>
+      (point: (String, Map[Int, Double])) =>
         LabeledPoint(
-          filesCats.lookup(point._1).head.toDouble,
+          filesCats.get(point._1).head.toDouble,
           Vectors.sparse(
             point._2.size,
             point._2.keySet.toArray,
@@ -89,7 +97,6 @@ object Driver {
     }
 
     //output results
-    labelAndPreds.foreach(println)
     val correct = labelAndPreds.filter(x => x._1 == x._2)
     println("correct: " + correct.count)
     val incorrect = labelAndPreds.filter(x => x._1 != x._2)
@@ -110,3 +117,5 @@ object Driver {
   }
 }
 
+
+//  \/\w+(\.\w+)+\n
