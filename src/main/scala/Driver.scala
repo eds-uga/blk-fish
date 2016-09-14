@@ -32,64 +32,7 @@ object Driver {
     val sparkConf = new SparkConf().setAppName("test-preprocess")
     val sc = new SparkContext(sparkConf)
 
-    val filesMeow: RDD[(String, String)] = sc.textFile("gs://project2-csci8360/data/trainLabels2.csv").map(line => (line.split(",")(0).replace("\"", ""), line.split(",")(1)))
-    val filesCats: Map[String, String] = filesMeow.toLocalIterator.foldLeft(Map.empty[String, String]) {
-      (acc, word) =>
-        acc + (word._1->word._2)
-    }
 
-    val trainDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/trainBytes/*.bytes")
-    //val trainDataAsm = sc.wholeTextFiles("gs://project2-csci8360/data/train/*.asm")
-
-    val bytes: RDD[(String, Array[String])] = trainDataBytes.map({
-      (kv: (String, String)) =>
-        (
-          kv._1.replaceAll("(.*\\/)","").replaceAll("(\\.\\w+)+",""),
-          kv._2.split(" ")
-            .filter(num => num.length <= 2)
-          )
-    })
-
-    val bytesS: RDD[(String, Map[String, Double])] = bytes.map({
-      doc =>
-        (
-          doc._1,
-          doc._2.foldLeft(Map.empty[String, Double]) {
-            (acc: Map[String, Double], word: String) =>
-              acc + (word -> (acc.getOrElse(word, 0.0) + 1.0))
-          }
-          )
-    })
-
-    val byteCounts: RDD[(String, Map[Int, Double])] = bytesS.map({
-      doc =>
-        (
-          doc._1,
-          doc._2.map(
-            (byte: (String, Double)) =>
-              try {
-                (Integer.parseInt(byte._1, 16), byte._2)
-              }catch{
-                case e : NumberFormatException => (257,byte._2)
-              }
-            )
-          )
-    })
-
-    val trainPoints: RDD[LabeledPoint] = byteCounts.map({
-      (point: (String, Map[Int, Double])) =>
-        LabeledPoint(
-          filesCats.get(point._1).head.toDouble,
-          Vectors.sparse(
-            258,
-            point._2.toSeq
-          )
-        )
-    })
-
-    //trainPoints.saveAsObjectFile("gs://project2-csci8360/data/objs/issue8fix")
-
-    trainPoints.foreach(a=>print(a.toString()))
 
 
 
@@ -107,24 +50,7 @@ object Driver {
 
     val accuracy = labelAndPreds.filter(pair => pair._1 == pair._2).count().toDouble/labelAndPreds.count().toDouble
     println(accuracy)
-    /*
-    //output results
-    val correct = labelAndPreds.filter(x => x._1 == x._2)
-    println("correct: " + correct.count)
-    val incorrect = labelAndPreds.filter(x => x._1 != x._2)
-    println("incorrect: " + incorrect.count)
-    val percentage = correct.count.toDouble/(correct.count.toDouble + incorrect.count.toDouble)
-    println("PERCENTAGE: " + percentage)
 
-    val dlls: RDD[(String, Array[String])] = trainDataAsm.map({
-      kv =>
-      (
-        kv._1,
-        kv._2.split(" ")
-          .filter(word=>word.contains(".dll")|word.contains(".DLL"))
-          .filter(word=>word.matches("\\w+\\.(dll)|(DLL)"))
-        )
-    })*/
 
   }
 }
