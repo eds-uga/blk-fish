@@ -78,11 +78,10 @@ object Driver {
     val testPoints: RDD[LabeledPoint] = testByteCounts.map({
       (point: (String, Map[Int, Double])) =>
         LabeledPoint(
-          filesCats.get(point._1).head.toDouble,
+          10.0,
           Vectors.sparse(
             258,
-            point._2.keySet.toArray,
-            point._2.values.toArray
+            point._2.toSeq
           )
         )
     })
@@ -95,29 +94,11 @@ object Driver {
     val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeatureInfo, numTrees, featureSubsetStrategy, costFunction, maxDepth, maxBins)
 
     //testing
-    val labelAndPreds = testingData.map { point =>
-      val prediction = model.predict(point.features)
-      (point.label, prediction)
-    }
+    val predictions = testPoints.map { point => model.predict(point.features)}
 
-    //output results
-    val correct = labelAndPreds.filter(x => x._1 == x._2)
-    println("correct: " + correct.count)
-    val incorrect = labelAndPreds.filter(x => x._1 != x._2)
-    println("incorrect: " + incorrect.count)
-    val percentage = correct.count.toDouble/(correct.count.toDouble + incorrect.count.toDouble)
-    println("PERCENTAGE: " + percentage)
+    val formattedPreds = predictions.map(pred => (pred.toInt)-1)
 
-/*    val dlls: RDD[(String, Array[String])] = trainDataAsm.map({
-      kv =>
-      (
-        kv._1,
-        kv._2.split(" ")
-          .filter(word=>word.contains(".dll")|word.contains(".DLL"))
-          .filter(word=>word.matches("\\w+\\.(dll)|(DLL)"))
-        )
-    })*/
-
+    formattedPreds.saveAsTextFile("gs://project2-csci8360/data/testOutput/")
   }
 }
 
