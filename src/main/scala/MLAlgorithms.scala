@@ -14,12 +14,12 @@ object MLAlgorithms {
 
   val numClasses = 9
   val categoricalFeatureInfo = Map[Int, Int]()//Can be used to make certain features (e.g .dll) categorical, for now not used
-  val numTrees = 10
+  val numTrees = 64// Recommended between 64-128
   val featureSubsetStrategy = "auto" //Will use sqrt strategy for numTrees > 1
   val costFunction = "entropy" //Other option entropy, gini better for continuous, entropy better for categorical. (though very little difference, and gini is faster)
-  val maxDepth = 5
-  val maxBins = 32
-  //val seed = scala.util.Random.nextLong()
+  val maxDepth = 5//Between 5-10
+  val maxBins = 100
+  val seed = scala.util.Random.nextInt
 
   //Gradient Boosted parameters not shared
   val minInfoGain =   0.00001
@@ -33,11 +33,11 @@ object MLAlgorithms {
     val sc = new SparkContext(sparkConf)
     //data processing
     val data = MLUtils.loadLibSVMFile(sc, "C:/Users/Brent/IdeaProjects/blk-fish/SVM.txt/")
-    val splits = data.randomSplit(Array(.75,.25))
+    val splits = data.randomSplit(Array(.95,.05))
     val (trainingData, testingData) = (splits(0), splits(1))
 
     //training
-    val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeatureInfo, numTrees, featureSubsetStrategy, costFunction, maxDepth, maxBins)
+    val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeatureInfo, numTrees, featureSubsetStrategy, costFunction, maxDepth, maxBins, seed)
 
     //testing
     val labelAndPreds = testingData.map { point =>
