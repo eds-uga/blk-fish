@@ -85,7 +85,11 @@ object Driver {
           )
         )
     })
+
+    trainPoints.saveAsObjectFile("gs://project2-csci8360/data/objs/issue8fix")
+    /*
     trainPoints.foreach(a=>print(a.toString()))
+
 
 
     val splits = trainPoints.randomSplit(Array(.99,.01))
@@ -108,7 +112,7 @@ object Driver {
     val percentage = correct.count.toDouble/(correct.count.toDouble + incorrect.count.toDouble)
     println("PERCENTAGE: " + percentage)
 
-/*    val dlls: RDD[(String, Array[String])] = trainDataAsm.map({
+    val dlls: RDD[(String, Array[String])] = trainDataAsm.map({
       kv =>
       (
         kv._1,
