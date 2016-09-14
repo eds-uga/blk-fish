@@ -24,7 +24,7 @@ object Driver {
     val numTrees = 32
     val featureSubsetStrategy = "auto" //Will use sqrt strategy for numTrees > 1
     val costFunction = "entropy" //Other option entropy, gini better for continuous, entropy better for categorical. (though very little difference, and gini is faster)
-    val maxDepth = 6
+    val maxDepth = 8
     val maxBins = 200
     val seed = scala.util.Random.nextInt()
 
@@ -32,11 +32,10 @@ object Driver {
     val sparkConf = new SparkConf().setAppName("test-preprocess")
     val sc = new SparkContext(sparkConf)
 
+    val trainPoints = sc.objectFile[LabeledPoint]("/home/brad/Documents/InteliJProjects/blk-fish/objs/issue8fix")
 
 
-
-
-    val splits = trainPoints.randomSplit(Array(.99,.01))
+    val splits = trainPoints.randomSplit(Array(.90,.10))
     val (trainingData, testingData) = (splits(0), splits(1))
 
     //training
