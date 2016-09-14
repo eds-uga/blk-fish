@@ -14,18 +14,19 @@ object Driver {
 
     //"gs://project2-csci8360/data/trainLabels.csv"
     //"gs://project2-csci8360/data/train/*.bytes"
+    //"gs://project2-csci8360/data/objs/issue8fix"
 
     //"/media/brad/BackUps/ms_mal_data/trainLabels.csv"
     //"/media/brad/BackUps/ms_mal_data/*.bytes"
 
-    val numClasses = 10
+    val numClasses = 9
     val categoricalFeatureInfo = Map[Int, Int]()//Can be used to make certain features (e.g .dll) categorical, for now not used
-    val numTrees = 10
+    val numTrees = 32
     val featureSubsetStrategy = "auto" //Will use sqrt strategy for numTrees > 1
     val costFunction = "entropy" //Other option entropy, gini better for continuous, entropy better for categorical. (though very little difference, and gini is faster)
-    val maxDepth = 5
-    val maxBins = 32
-
+    val maxDepth = 6
+    val maxBins = 200
+    val seed = scala.util.Random.nextInt()
 
 
     val sparkConf = new SparkConf().setAppName("test-preprocess")
@@ -86,8 +87,8 @@ object Driver {
         )
     })
 
-    trainPoints.saveAsObjectFile("gs://project2-csci8360/data/objs/issue8fix")
-    /*
+    //trainPoints.saveAsObjectFile("gs://project2-csci8360/data/objs/issue8fix")
+
     trainPoints.foreach(a=>print(a.toString()))
 
 
@@ -96,7 +97,7 @@ object Driver {
     val (trainingData, testingData) = (splits(0), splits(1))
 
     //training
-    val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeatureInfo, numTrees, featureSubsetStrategy, costFunction, maxDepth, maxBins)
+    val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeatureInfo, numTrees, featureSubsetStrategy, costFunction, maxDepth, maxBins, seed)
 
     //testing
     val labelAndPreds = testingData.map { point =>
@@ -104,6 +105,9 @@ object Driver {
       (point.label, prediction)
     }
 
+    val accuracy = labelAndPreds.filter(pair => pair._1 == pair._2).count().toDouble/labelAndPreds.count().toDouble
+    println(accuracy)
+    /*
     //output results
     val correct = labelAndPreds.filter(x => x._1 == x._2)
     println("correct: " + correct.count)
