@@ -81,8 +81,7 @@ object Driver {
           filesCats.get(point._1).head.toDouble,
           Vectors.sparse(
             257,
-            point._2.keySet.toArray,
-            point._2.values.toArray
+            point._2.toSeq
           )
         )
     })
