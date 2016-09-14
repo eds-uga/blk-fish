@@ -80,7 +80,7 @@ object Driver {
         LabeledPoint(
           filesCats.get(point._1).head.toDouble,
           Vectors.sparse(
-            257,
+            258,
             point._2.toSeq
           )
         )
