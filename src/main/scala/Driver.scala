@@ -37,7 +37,7 @@ object Driver {
         acc + (word._1->word._2)
     }
 
-    val trainDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/train/*.bytes")
+    val trainDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/trainBytes/*.bytes")
     //val trainDataAsm = sc.wholeTextFiles("gs://project2-csci8360/data/train/*.asm")
 
     val bytes: RDD[(String, Array[String])] = trainDataBytes.map({
