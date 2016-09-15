@@ -12,7 +12,7 @@ import org.apache.spark.mllib.tree.RandomForest
 object Driver {
   def main(args: Array[String]) = {
 
-    //Define the parentmeters to be used in the Random Forest
+    //Define the parameters to be used in the Random Forest
     val numClasses = 9
     val categoricalFeatureInfo = Map[Int, Int]()//Can be used to make certain features (e.g .dll) categorical, for now not used
     val numTrees = 32
