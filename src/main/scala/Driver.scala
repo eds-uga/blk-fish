@@ -96,7 +96,7 @@ object Driver {
     //testing
     val predictions = testPoints.map { point => model.predict(point.features)}
 
-    val formattedPreds = predictions.map(pred => (pred.toInt)-1)
+    val formattedPreds = predictions.map(pred => (pred.toInt)+1)
 
     formattedPreds.saveAsTextFile("gs://project2-csci8360/data/testOutput/")
   }
