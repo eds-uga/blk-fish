@@ -12,13 +12,7 @@ import org.apache.spark.mllib.tree.RandomForest
 object Driver {
   def main(args: Array[String]) = {
 
-    //"gs://project2-csci8360/data/trainLabels.csv"
-    //"gs://project2-csci8360/data/train/*.bytes"
-    //"gs://project2-csci8360/data/objs/issue8fix"
-
-    //"/media/brad/BackUps/ms_mal_data/trainLabels.csv"
-    //"/media/brad/BackUps/ms_mal_data/*.bytes"
-
+    //Define the parentmeters to be used in the Random Forest
     val numClasses = 9
     val categoricalFeatureInfo = Map[Int, Int]()//Can be used to make certain features (e.g .dll) categorical, for now not used
     val numTrees = 32
@@ -28,15 +22,15 @@ object Driver {
     val maxBins = 200
     val seed = scala.util.Random.nextInt()
 
-
+    //Initialize SparkContext
     val sparkConf = new SparkConf().setAppName("test-preprocess")
     val sc = new SparkContext(sparkConf)
 
+    //Load in the already pre-processed training data (pre-processed same way as the testing data is about the be)
     val trainingData = sc.objectFile[LabeledPoint]("gs://project2-csci8360/data/objs/issue8fix")
 
 
-    //Preprocess the testing data
-
+    //Pre-process the testing data
     val testDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/testBytes/*.bytes")
     //val trainDataAsm = sc.wholeTextFiles("gs://project2-csci8360/data/train/*.asm")
 
@@ -86,18 +80,16 @@ object Driver {
         )
     })
 
-
-    //val splits = trainPoints.randomSplit(Array(.99,.01))
-    //val (trainingData, testingData) = (splits(0), splits(1))
-
-    //training
+    //Training the Random Forest Model
     val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeatureInfo, numTrees, featureSubsetStrategy, costFunction, maxDepth, maxBins)
 
-    //testing
+    //Testing the trained model against the pre-processed testing data
     val predictions = testPoints.map { point => model.predict(point.features)}
 
+    //Formatting the classifier output
     val formattedPreds = predictions.map(pred => (pred.toInt)+1)
 
+    //Saving the output to a txt file
     formattedPreds.saveAsTextFile("gs://project2-csci8360/data/testOutput/")
   }
 }
