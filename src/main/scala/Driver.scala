@@ -12,35 +12,29 @@ import org.apache.spark.mllib.tree.RandomForest
 object Driver {
   def main(args: Array[String]) = {
 
-    //"gs://project2-csci8360/data/trainLabels.csv"
-    //"gs://project2-csci8360/data/train/*.bytes"
-
-    //"/media/brad/BackUps/ms_mal_data/trainLabels.csv"
-    //"/media/brad/BackUps/ms_mal_data/*.bytes"
-
-    val numClasses = 10
+    //Define the parameters to be used in the Random Forest
+    val numClasses = 9
     val categoricalFeatureInfo = Map[Int, Int]()//Can be used to make certain features (e.g .dll) categorical, for now not used
-    val numTrees = 10
+    val numTrees = 32
     val featureSubsetStrategy = "auto" //Will use sqrt strategy for numTrees > 1
     val costFunction = "entropy" //Other option entropy, gini better for continuous, entropy better for categorical. (though very little difference, and gini is faster)
-    val maxDepth = 5
-    val maxBins = 32
+    val maxDepth = 8
+    val maxBins = 200
+    val seed = scala.util.Random.nextInt()
 
-
-
+    //Initialize SparkContext
     val sparkConf = new SparkConf().setAppName("test-preprocess")
     val sc = new SparkContext(sparkConf)
 
-    val filesMeow: RDD[(String, String)] = sc.textFile("gs://project2-csci8360/data/trainLabels2.csv").map(line => (line.split(",")(0).replace("\"", ""), line.split(",")(1)))
-    val filesCats: Map[String, String] = filesMeow.toLocalIterator.foldLeft(Map.empty[String, String]) {
-      (acc, word) =>
-        acc + (word._1->word._2)
-    }
+    //Load in the already pre-processed training data (pre-processed same way as the testing data is about the be)
+    val trainingData = sc.objectFile[LabeledPoint]("gs://project2-csci8360/data/objs/issue8fix")
 
-    val trainDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/trainBytes/*.bytes")
+
+    //Pre-process the testing data
+    val testDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/testBytes/*.bytes")
     //val trainDataAsm = sc.wholeTextFiles("gs://project2-csci8360/data/train/*.asm")
 
-    val bytes: RDD[(String, Array[String])] = trainDataBytes.map({
+    val testBytes: RDD[(String, Array[String])] = testDataBytes.map({
       (kv: (String, String)) =>
         (
           kv._1.replaceAll("(.*\\/)","").replaceAll("(\\.\\w+)+",""),
@@ -49,7 +43,7 @@ object Driver {
           )
     })
 
-    val bytesS: RDD[(String, Map[String, Double])] = bytes.map({
+    val testBytesS: RDD[(String, Map[String, Double])] = testBytes.map({
       doc =>
         (
           doc._1,
@@ -60,7 +54,7 @@ object Driver {
           )
     })
 
-    val byteCounts: RDD[(String, Map[Int, Double])] = bytesS.map({
+    val testByteCounts: RDD[(String, Map[Int, Double])] = testBytesS.map({
       doc =>
         (
           doc._1,
@@ -75,10 +69,10 @@ object Driver {
           )
     })
 
-    val trainPoints: RDD[LabeledPoint] = byteCounts.map({
+    val testPoints: RDD[LabeledPoint] = testByteCounts.map({
       (point: (String, Map[Int, Double])) =>
         LabeledPoint(
-          filesCats.get(point._1).head.toDouble,
+          10.0,
           Vectors.sparse(
             258,
             point._2.toSeq
@@ -86,42 +80,17 @@ object Driver {
         )
     })
 
-    trainPoints.saveAsObjectFile("gs://project2-csci8360/data/objs/issue8fix")
-    /*
-    trainPoints.foreach(a=>print(a.toString()))
-
-
-
-    val splits = trainPoints.randomSplit(Array(.99,.01))
-    val (trainingData, testingData) = (splits(0), splits(1))
-
-    //training
+    //Training the Random Forest Model
     val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeatureInfo, numTrees, featureSubsetStrategy, costFunction, maxDepth, maxBins)
 
-    //testing
-    val labelAndPreds = testingData.map { point =>
-      val prediction = model.predict(point.features)
-      (point.label, prediction)
-    }
+    //Testing the trained model against the pre-processed testing data
+    val predictions = testPoints.map { point => model.predict(point.features)}
 
-    //output results
-    val correct = labelAndPreds.filter(x => x._1 == x._2)
-    println("correct: " + correct.count)
-    val incorrect = labelAndPreds.filter(x => x._1 != x._2)
-    println("incorrect: " + incorrect.count)
-    val percentage = correct.count.toDouble/(correct.count.toDouble + incorrect.count.toDouble)
-    println("PERCENTAGE: " + percentage)
+    //Formatting the classifier output
+    val formattedPreds = predictions.map(pred => (pred.toInt)+1)
 
-    val dlls: RDD[(String, Array[String])] = trainDataAsm.map({
-      kv =>
-      (
-        kv._1,
-        kv._2.split(" ")
-          .filter(word=>word.contains(".dll")|word.contains(".DLL"))
-          .filter(word=>word.matches("\\w+\\.(dll)|(DLL)"))
-        )
-    })*/
-
+    //Saving the output to a txt file
+    formattedPreds.saveAsTextFile("gs://project2-csci8360/data/testOutput/")
   }
 }
 
