@@ -1,15 +1,21 @@
+package BlkFish
+
 /**
   * Created by bradford_bazemore on 9/4/16.
   */
 
 import org.apache.spark._
-import org.apache.spark.rdd.RDD
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.tree.RandomForest
+import org.apache.spark.rdd.RDD
 
 
 object Driver {
+
+  val sparkConf = new SparkConf().setAppName("test-preprocess")
+  val sc = new SparkContext(sparkConf)
+
   def main(args: Array[String]) = {
 
     //Define the parameters to be used in the Random Forest
@@ -22,17 +28,14 @@ object Driver {
     val maxBins = 200
     val seed = scala.util.Random.nextInt()
 
-    //Initialize SparkContext
-    val sparkConf = new SparkConf().setAppName("test-preprocess")
-    val sc = new SparkContext(sparkConf)
-
     //Load in the already pre-processed training data (pre-processed same way as the testing data is about the be)
     val trainingData = sc.objectFile[LabeledPoint]("gs://project2-csci8360/data/objs/issue8fix")
 
 
     //Pre-process the testing data
     val testDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/testBytes/*.bytes")
-    //val trainDataAsm = sc.wholeTextFiles("gs://project2-csci8360/data/train/*.asm")
+
+    val test = Preprocess.removeMemPath(testByteCounts)
 
     val testBytes: RDD[(String, Array[String])] = testDataBytes.map({
       (kv: (String, String)) =>
@@ -63,7 +66,7 @@ object Driver {
               try {
                 (Integer.parseInt(byte._1, 16), byte._2)
               }catch{
-                case e : NumberFormatException => (257,byte._2)
+                case e: NumberFormatException => (257,byte._2)
               }
             )
           )
