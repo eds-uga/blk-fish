@@ -1,5 +1,6 @@
 package BlkFish
 
+import java.io.FileNotFoundException
 import java.util.Calendar
 
 import org.apache.spark._
@@ -29,9 +30,33 @@ object Driver {
 
     val categoricalFeatureInfo = Map[Int, Int]()
 
-    val trainData = sc.objectFile[LabeledPoint](conf.getString("ml.path.trainData"))
-    val testDataBytes: RDD[(String, String)] = sc.wholeTextFiles(conf.getString("ml.path.testData"))
-    val testLabeledPoints = toLabeledPoints(bytesToInt(byteCount(removeMemPath(testDataBytes))))
+    val trainData = try {
+      sc.objectFile[LabeledPoint](conf.getString("ml.path.trainData"))
+    } catch {
+      case ex: FileNotFoundException => println(s"ERROR: Could not find ${conf.getString("ml.path.trainData")}")
+        println("Aborting...")
+        sc.stop()
+        null
+    }
+
+    val testDataBytes: RDD[(String, String)] = try {
+      sc.wholeTextFiles(conf.getString("ml.path.testData"))
+    } catch {
+      case ex: FileNotFoundException => println(s"ERROR: Could not find ${conf.getString("ml.path.testData")}")
+        println("Aborting...")
+        sc.stop()
+        null
+    }
+
+    val testLabeledPoints = toLabeledPoints(
+      bytesToInt(
+        byteCount(
+          removeMemPath(
+            testDataBytes
+          )
+        )
+      )
+    )
 
     val model = RandomForest.trainClassifier(
       trainData,
