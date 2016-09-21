@@ -1,10 +1,13 @@
 package BlkFish
 
+import java.util.Calendar
+
 import org.apache.spark._
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.rdd.RDD
 import com.typesafe.config.ConfigFactory
+import org.apache.hadoop.mapred._
 import Preprocess._
 
 /**
@@ -17,6 +20,7 @@ object Driver {
 
   /**
     * Main method used to run spark. If used in the play framework it will be the controller
+    *
     * @param args Commandline arguments to pass into the application
     */
   def main(args: Array[String]) = {
@@ -42,8 +46,22 @@ object Driver {
 
     val predictions = testLabeledPoints.map { point => model.predict(point.features) }
 
-    val formattedPredictions = predictions.map(pred => (pred.toInt) + 1)
+    val formattedPredictions = predictions.map(predication => predication.toInt + 1)
 
-    formattedPredictions.saveAsTextFile(conf.getString("ml.path.predictionsOutput"))
+    try {
+      formattedPredictions.saveAsTextFile(conf.getString("ml.path.predictionsOutput"))
+    } catch {
+      case ex: FileAlreadyExistsException => println("Prediction file already exists attempting to save with count append")
+        try {
+          formattedPredictions.saveAsTextFile(conf.getString("ml.path.predictionsOutput") + Calendar.getInstance.getTimeInMillis.toString)
+        } catch {
+          case FileAlreadyExistsException => println("Failed to save with appended file name.")
+            println("File will not be saved")
+          case _ => println("Unknown error at save predictions")
+        }
+
+      case _ => println("Unknown error at save predictions")
+    }
+
   }
 }

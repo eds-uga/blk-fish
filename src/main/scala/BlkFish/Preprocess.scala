@@ -1,6 +1,8 @@
 package BlkFish
 
-import java.io.FileNotFoundException
+import java.util.Calendar
+
+import org.apache.hadoop.mapred._
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
@@ -157,9 +159,16 @@ object Preprocess {
     try {
       data.saveAsObjectFile(fileName)
     } catch {
-      case e: FileNotFoundException => println(s"Could not find file for saving $fileName")
-      case _ => println(s"An unknown error occurred at saving $fileName")
+      case ex: FileAlreadyExistsException => println(s"$fileName already exists attempting to save with count append")
+        try {
+          data.saveAsObjectFile(fileName+Calendar.getInstance.getTimeInMillis.toString)
+        } catch {
+          case FileAlreadyExistsException => println("Failed to save with appended file name.")
+            println("File will not be saved")
+          case _ => println("Unknown error at saveLabeledPoint")
+        }
+
+      case _ => println("Unknown error at saveLabeledPoint")
     }
-  }
 
 }
