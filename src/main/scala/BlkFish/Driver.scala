@@ -11,6 +11,7 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.rdd.RDD
 import com.typesafe.config.ConfigFactory
+import Preprocess._
 
 object Driver {
 
@@ -38,8 +39,9 @@ object Driver {
     //Pre-process the testing data
     val testDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/testBytes/*.bytes")
 
+    val testData = toLabeledPoints(bytesToInt(byteCount(removeMemPath(testDataBytes))))
 
-    val testBytes: RDD[(String, Array[String])] = testDataBytes.map({
+    /*val testBytes: RDD[(String, Array[String])] = testDataBytes.map({
       (kv: (String, String)) =>
         (
           kv._1.replaceAll("(.*\\/)","").replaceAll("(\\.\\w+)+",""),
@@ -83,13 +85,13 @@ object Driver {
             point._2.toSeq
           )
         )
-    })
+    })*/
 
     //Training the Random Forest Model
     val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeatureInfo, numTrees, featureSubsetStrategy, costFunction, maxDepth, maxBins)
 
     //Testing the trained model against the pre-processed testing data
-    val predictions = testPoints.map { point => model.predict(point.features)}
+    val predictions = testData.map { point => model.predict(point.features)}
 
     //Formatting the classifier output
     val formattedPreds = predictions.map(pred => (pred.toInt)+1)
