@@ -2,7 +2,7 @@ All members had some input in every aspect of this project. This list details wh
 
 Research, Malware Domain: Brad Bazemore
 
-Research, Kaggle Finalists/Machin Learning: Chandler Kincaid
+Research, Kaggle Finalists/Machine Learning: Chandler Kincaid
 
 Preliminary data manipulation (sub-sampling, feature selection): Chandler Kincaid, Brent Lippert
 
