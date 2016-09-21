@@ -25,7 +25,8 @@ object Preprocess {
       })
     } catch {
       case _ => println("Error at removeMemPath")
-        throw UnknownError
+        Driver.sc.stop()
+        return null
     }
   }
 
@@ -43,7 +44,8 @@ object Preprocess {
       })
     } catch {
       case _ => println("Error at byteCount")
-        throw UnknownError
+        Driver.sc.stop()
+        return null
     }
   }
 
@@ -65,7 +67,8 @@ object Preprocess {
       })
     }catch {
       case _ => println("Error at bytesToInt")
-        throw UnknownError
+        Driver.sc.stop()
+        return null
     }
   }
 
@@ -83,7 +86,8 @@ object Preprocess {
       })
     }catch {
       case _ => println("Error at toLabeledPoints")
-        throw UnknownError
+        Driver.sc.stop()
+        return null
     }
   }
 
@@ -101,7 +105,8 @@ object Preprocess {
       })
     }catch {
       case _ => println("Error at toLabeledPoints")
-        throw UnknownError
+        Driver.sc.stop()
+        return null
     }
   }
 
@@ -116,7 +121,7 @@ object Preprocess {
     try {
       data.saveAsObjectFile(fileName)
     } catch {
-      case FileNotFoundException => println(s"Could not find file for saving $fileName")
+      case e: FileNotFoundException => println(s"Could not find file for saving $fileName")
       case _ => println(s"An unknown error occurred at saving $fileName")
     }
   }

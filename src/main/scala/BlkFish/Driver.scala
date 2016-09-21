@@ -37,55 +37,9 @@ object Driver {
 
 
     //Pre-process the testing data
-    val testDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/testBytes/*.bytes")
+    val testDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/testing/*.bytes")
 
     val testData = toLabeledPoints(bytesToInt(byteCount(removeMemPath(testDataBytes))))
-
-    /*val testBytes: RDD[(String, Array[String])] = testDataBytes.map({
-      (kv: (String, String)) =>
-        (
-          kv._1.replaceAll("(.*\\/)","").replaceAll("(\\.\\w+)+",""),
-          kv._2.split(" ")
-            .filter(num => num.length <= 2)
-          )
-    })
-
-    val testBytesS: RDD[(String, Map[String, Double])] = testBytes.map({
-      doc =>
-        (
-          doc._1,
-          doc._2.foldLeft(Map.empty[String, Double]) {
-            (acc: Map[String, Double], word: String) =>
-              acc + (word -> (acc.getOrElse(word, 0.0) + 1.0))
-          }
-          )
-    })
-
-    val testByteCounts: RDD[(String, Map[Int, Double])] = testBytesS.map({
-      doc =>
-        (
-          doc._1,
-          doc._2.map(
-            (byte: (String, Double)) =>
-              try {
-                (Integer.parseInt(byte._1, 16), byte._2)
-              }catch{
-                case e: NumberFormatException => (257,byte._2)
-              }
-            )
-          )
-    })
-
-    val testPoints: RDD[LabeledPoint] = testByteCounts.map({
-      (point: (String, Map[Int, Double])) =>
-        LabeledPoint(
-          10.0,
-          Vectors.sparse(
-            258,
-            point._2.toSeq
-          )
-        )
-    })*/
 
     //Training the Random Forest Model
     val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeatureInfo, numTrees, featureSubsetStrategy, costFunction, maxDepth, maxBins)
@@ -97,7 +51,7 @@ object Driver {
     val formattedPreds = predictions.map(pred => (pred.toInt)+1)
 
     //Saving the output to a txt file
-    formattedPreds.saveAsTextFile("gs://project2-csci8360/data/testOutput/")
+    formattedPreds.saveAsTextFile("gs://project2-csci8360/methods-test/")
   }
 }
 
