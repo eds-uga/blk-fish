@@ -9,3 +9,6 @@
 [![Build Status](https://travis-ci.org/snakes-in-the-box/blk-fish.svg?branch=master)](https://travis-ci.org/snakes-in-the-box/blk-fish)
 
 Automated malware classification system
+
+
+Please see wiki for more information.
