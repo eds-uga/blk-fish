@@ -47,6 +47,28 @@ object Preprocess {
     }
   }
 
+  def bytesToInt(data: RDD[(String,Map[String,Double])]):RDD[(String,Map[Int,Double])]={
+    try {
+      data.map({
+        doc =>
+          (
+            doc._1,
+            doc._2.map(
+              (byte: (String, Double)) =>
+                try {
+                  (Integer.parseInt(byte._1, 16), byte._2)
+                } catch {
+                  case e: NumberFormatException => (257, byte._2)
+                }
+            )
+            )
+      })
+    }catch {
+      case _ => println("Error at bytesToInt")
+        throw UnknownError
+    }
+  }
+
   def toLabeledPoints(data: RDD[(String, Map[Int, Double])]): RDD[LabeledPoint] = {
     try {
       data.map({
@@ -65,7 +87,32 @@ object Preprocess {
     }
   }
 
-  def save(data: RDD[LabeledPoint], fileName: String): Unit = {
+  def toLabeledPoints(data: RDD[(String, Map[Int, Double])], cats:Map[String,String]): RDD[LabeledPoint] = {
+    try {
+      data.map({
+        (point: (String, Map[Int, Double])) =>
+          LabeledPoint(
+            cats.get(point._1).head.toDouble,
+            Vectors.sparse(
+              258,
+              point._2.toSeq
+            )
+          )
+      })
+    }catch {
+      case _ => println("Error at toLabeledPoints")
+        throw UnknownError
+    }
+  }
+
+  def categoriesToMap(data:RDD[(String,String)]):Map[String,String]={
+    data.toLocalIterator.foldLeft(Map.empty[String, String]) {
+      (acc, word) =>
+        acc + (word._1->word._2)
+    }
+  }
+
+  def saveLabeledPoint(data: RDD[LabeledPoint], fileName: String): Unit = {
     try {
       data.saveAsObjectFile(fileName)
     } catch {

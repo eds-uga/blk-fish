@@ -4,12 +4,13 @@ package BlkFish
   * Created by bradford_bazemore on 9/4/16.
   */
 
+import com.typesafe.config.ConfigFactory
 import org.apache.spark._
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.rdd.RDD
-
+import com.typesafe.config.ConfigFactory
 
 object Driver {
 
@@ -17,6 +18,8 @@ object Driver {
   val sc = new SparkContext(sparkConf)
 
   def main(args: Array[String]) = {
+
+    val conf = ConfigFactory.load()
 
     //Define the parameters to be used in the Random Forest
     val numClasses = 9
@@ -35,7 +38,6 @@ object Driver {
     //Pre-process the testing data
     val testDataBytes: RDD[(String, String)] = sc.wholeTextFiles("gs://project2-csci8360/data/testBytes/*.bytes")
 
-    val test = Preprocess.removeMemPath(testByteCounts)
 
     val testBytes: RDD[(String, Array[String])] = testDataBytes.map({
       (kv: (String, String)) =>
