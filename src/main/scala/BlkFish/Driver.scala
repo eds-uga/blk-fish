@@ -51,11 +51,12 @@ object Driver {
     try {
       formattedPredictions.saveAsTextFile(conf.getString("ml.path.predictionsOutput"))
     } catch {
+
       case ex: FileAlreadyExistsException => println("Prediction file already exists attempting to save with count append")
         try {
           formattedPredictions.saveAsTextFile(conf.getString("ml.path.predictionsOutput") + Calendar.getInstance.getTimeInMillis.toString)
         } catch {
-          case FileAlreadyExistsException => println("Failed to save with appended file name.")
+          case ex: FileAlreadyExistsException => println("Failed to save with appended file name.")
             println("File will not be saved")
           case _ => println("Unknown error at save predictions")
         }
