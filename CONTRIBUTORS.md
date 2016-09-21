@@ -8,6 +8,8 @@ Preliminary data manipulation (sub-sampling, feature selection): Chandler Kincai
 
 Data Preprocessing: Brad Bazemore
 
+Data Pipeline: Brad Bazemore, Brent Lippert
+
 Machine Learning implementation: Brent Lippert
 
 Machine Learning performance tuning: Chandler Kincaid, Brent Lippert
