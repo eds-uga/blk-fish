@@ -10,5 +10,6 @@
 5. Machine Learning 
   1. Implementation: Brent Lippert
   2. Performance tuning: Chandler Kincaid, Brent Lippert
+6. Software Engineering: Brad Bazemore, Brent Lippert
 7. Wiki's: Chandler Kincaid
 8. Web experimentation: All
